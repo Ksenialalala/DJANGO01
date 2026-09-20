@@ -15,13 +15,10 @@ class Registration(models.Model):
         verbose_name = "Регистрация"
         verbose_name_plural = "Регистрации"
         
-    def __str__(self) -> str:
-        return self.name
-
 
 class Event(models.Model):
-    location = models.ForeignKey("registration.Location", on_delete=models.CASCADE, null=True, verbose_name = "Пользователь")
-    organizer = models.ForeignKey("registration.Organizer", on_delete=models.CASCADE, null=True, verbose_name = "Мероприятие")
+    location = models.ForeignKey("registration.Location", on_delete=models.CASCADE, null=True, verbose_name = "Локация")
+    organizer = models.ForeignKey("registration.Organizer", on_delete=models.CASCADE, null=True, verbose_name = "Организатор")
     title = models.TextField("Название")
     description = models.TextField("Описание")
     event_date = models.DateTimeField("Дата")
@@ -35,9 +32,6 @@ class Event(models.Model):
         verbose_name = "Мероприятие"
         verbose_name_plural = "Мероприятия"
 
-    def __str__(self) -> str:
-            return self.name
-
 class Location(models.Model):
     name = models.TextField("Название")
     address = models.TextField("Адрес")
@@ -45,6 +39,9 @@ class Location(models.Model):
     class Meta:
         verbose_name = "Локация"
         verbose_name_plural = "Локации"
+
+    def __str__(self) -> str:
+            return self.name
 
 class Review(models.Model):
     user = models.ForeignKey("auth.User", on_delete=models.CASCADE, null=True, verbose_name = "Пользователь")
@@ -56,8 +53,6 @@ class Review(models.Model):
         verbose_name = "Отзыв"
         verbose_name_plural = "Отзывы"
 
-    def __str__(self) -> str:
-            return self.name
     
 class EventMaterial(models.Model):
     event = models.ForeignKey("registration.Event", on_delete=models.CASCADE, null=True, verbose_name = "Мероприятие")
@@ -70,14 +65,14 @@ class EventMaterial(models.Model):
         verbose_name = "Материал"
         verbose_name_plural = "Материалы"
 
-    def __str__(self) -> str:
-            return self.name
-
 class Organizer(models.Model):
-    name = models.TextField("Имя")
+    name = models.TextField("ФИО")
     position = models.TextField("Должность")
     phone = models.TextField("Номер")
     email = models.TextField("Почта")
     class Meta:
         verbose_name = "Организатор"
         verbose_name_plural = "Организаторы"
+        
+    def __str__(self) -> str:
+            return self.name
