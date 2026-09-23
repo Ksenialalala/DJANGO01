@@ -1,5 +1,7 @@
 from django.db import models
 
+
+
 # Create your models here.
 class Registration(models.Model):
     user = models.ForeignKey("auth.User", on_delete=models.CASCADE, null=True, verbose_name = "Пользователь")
@@ -16,7 +18,7 @@ class Registration(models.Model):
         verbose_name_plural = "Регистрации"
 
     def __str__(self) -> str:
-                return self.name
+            return self.name
         
 
 class Event(models.Model):
@@ -34,6 +36,9 @@ class Event(models.Model):
     class Meta:
         verbose_name = "Мероприятие"
         verbose_name_plural = "Мероприятия"
+
+    def __str__(self) -> str:
+        return self.title
     
         
 
@@ -63,12 +68,15 @@ class EventMaterial(models.Model):
     event = models.ForeignKey("registration.Event", on_delete=models.CASCADE, null=True, verbose_name = "Мероприятие")
     title = models.TextField("Название")
     description = models.TextField("Описание")
+    #изменить на файл
     file_path = models.TextField("Путь к файлу")
     material_type = models.TextField("Тип")
     material_date = models.DateTimeField(auto_now_add=True)
     class Meta:
         verbose_name = "Материал"
         verbose_name_plural = "Материалы"
+
+    
 
 class Organizer(models.Model):
     name = models.TextField("ФИО")
