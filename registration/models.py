@@ -14,6 +14,9 @@ class Registration(models.Model):
     class Meta:
         verbose_name = "Регистрация"
         verbose_name_plural = "Регистрации"
+
+    def __str__(self) -> str:
+                return self.name
         
 
 class Event(models.Model):
@@ -31,6 +34,8 @@ class Event(models.Model):
     class Meta:
         verbose_name = "Мероприятие"
         verbose_name_plural = "Мероприятия"
+    
+        
 
 class Location(models.Model):
     name = models.TextField("Название")

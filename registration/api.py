@@ -24,7 +24,8 @@ class RegistrationsViewset(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
     mixins.RetrieveModelMixin,
-    mixins.ListModelMixin, 
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin, 
     GenericViewSet
 ):
     queryset = Registration.objects.all()
@@ -36,6 +37,7 @@ class EventsViewset(
     mixins.UpdateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin, 
+    mixins.DestroyModelMixin, 
     GenericViewSet
 ):
     queryset = Event.objects.all()
@@ -47,6 +49,7 @@ class LocationsViewset(
     mixins.UpdateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin, 
+    mixins.DestroyModelMixin, 
     GenericViewSet
 ):
     queryset = Location.objects.all()
@@ -58,6 +61,7 @@ class ReviewsViewset(
     mixins.UpdateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin, 
+    mixins.DestroyModelMixin, 
     GenericViewSet
 ):
     queryset = Review.objects.all()
@@ -69,6 +73,7 @@ class EventMaterialsViewset(
     mixins.UpdateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin, 
+    mixins.DestroyModelMixin, 
     GenericViewSet
 ):
     queryset = EventMaterial.objects.all()
@@ -80,6 +85,7 @@ class OrganizersViewset(
     mixins.UpdateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin, 
+    mixins.DestroyModelMixin, 
     GenericViewSet
 ):
     queryset = Organizer.objects.all()

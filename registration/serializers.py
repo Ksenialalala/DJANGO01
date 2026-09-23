@@ -30,8 +30,8 @@ class LocationSerializer(serializers.ModelSerializer):
 
 
 class EventSerializer(serializers.ModelSerializer):
-    organizer = OrganizerSerializer(read_only = "True")
-    location = LocationSerializer(read_only = "True")
+    #organizer = OrganizerSerializer(read_only = "True")
+    #location = LocationSerializer(read_only = "True")
     class Meta:
         model = Event
         fields = [
