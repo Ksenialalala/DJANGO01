@@ -24,6 +24,7 @@ class EventAdmin(admin.ModelAdmin):
         'description', 
         'event_date', 
         'max_participants', 
+        'image',
         'status'
     ]
 
@@ -44,8 +45,7 @@ class EventMaterialAdmin(admin.ModelAdmin):
         'event',
         'title',
         'description',
-        'file_path',
-        'material_type',
+        'file',
         'material_date'
     ]
 

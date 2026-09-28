@@ -1,6 +1,8 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
 from model_bakery import baker
+from django.core.files.uploadedfile import SimpleUploadedFile
+
 from registration.models import (
     Registration,
     Event,
@@ -471,9 +473,16 @@ class EventMaterialViewsetTestCase(TestCase):
             organizer=organizer
         )
 
+        file = SimpleUploadedFile(
+            "program.pdf",
+            b"test file content",
+            content_type="application/pdf"
+        )
+
         material = baker.make(
             "EventMaterial",
-            event=event
+            event=event,
+            file=file
         )
 
         r = self.client.get('/api/event-materials/')
@@ -483,21 +492,31 @@ class EventMaterialViewsetTestCase(TestCase):
         assert material.event.id == data[0]['event']
         assert material.title == data[0]['title']
         assert material.description == data[0]['description']
-        assert material.file_path == data[0]['file_path']
-        assert material.material_type == data[0]['material_type']
         assert material.id == data[0]['id']
+        assert data[0]['file'].endswith(".pdf")
         assert len(data) == 1
 
     def test_create_event_material(self):
         event = baker.make("Event")
 
-        r = self.client.post("/api/event-materials/", {
-            "event": event.id,
-            "title": "Программа мероприятия",
-            "description": "Программа литературного вечера",
-            "file_path": "/files/program.pdf",
-            "material_type": "PDF"
-        })
+        file = SimpleUploadedFile(
+            "program.pdf",
+            b"test file content",
+            content_type="application/pdf"
+        )
+
+        r = self.client.post(
+            "/api/event-materials/",
+            {
+                "event": event.id,
+                "title": "Программа мероприятия",
+                "description": "Программа литературного вечера",
+                "file": file
+            },
+            format="multipart"
+        )
+
+        assert r.status_code == 201
 
         new_material_id = r.json()['id']
 
@@ -511,8 +530,7 @@ class EventMaterialViewsetTestCase(TestCase):
         assert new_material.event.id == event.id
         assert new_material.title == "Программа мероприятия"
         assert new_material.description == "Программа литературного вечера"
-        assert new_material.file_path == "/files/program.pdf"
-        assert new_material.material_type == "PDF"
+        assert new_material.file.name.endswith(".pdf")
 
     def test_delete_event_material(self):
         materials = baker.make("EventMaterial", 10)
@@ -563,9 +581,7 @@ class EventMaterialViewsetTestCase(TestCase):
             {
                 "event": material.event.id,
                 "title": "Новая программа",
-                "description": material.description,
-                "file_path": material.file_path,
-                "material_type": material.material_type
+                "description": material.description
             }
         )
 

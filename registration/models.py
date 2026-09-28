@@ -28,6 +28,7 @@ class Event(models.Model):
     description = models.TextField("Описание")
     event_date = models.DateTimeField("Дата")
     max_participants = models.IntegerField("Количество участников")
+    image = models.ImageField("Картинка", null=True, blank=True, upload_to='events/')
     class StatusType(models.TextChoices):
         PLANNED = "PLANNED", "Запланировано"
         COMPLETED = "COMPLETED", "Завершено"
@@ -68,9 +69,7 @@ class EventMaterial(models.Model):
     event = models.ForeignKey("registration.Event", on_delete=models.CASCADE, null=True, verbose_name = "Мероприятие")
     title = models.TextField("Название")
     description = models.TextField("Описание")
-    #изменить на файл
-    file_path = models.TextField("Путь к файлу")
-    material_type = models.TextField("Тип")
+    file = models.FileField("Файл", null=True, blank=True, upload_to="event_materials/")
     material_date = models.DateTimeField(auto_now_add=True)
     class Meta:
         verbose_name = "Материал"

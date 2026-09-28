@@ -42,11 +42,9 @@ class EventSerializer(serializers.ModelSerializer):
             'description',
             'event_date',
             'max_participants',
+            'image',
             'status'
         ]
-
-
-
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -72,8 +70,7 @@ class EventMaterialSerializer(serializers.ModelSerializer):
             'event',
             'title',
             'description',
-            'file_path',
-            'material_type',
+            'file',
             'material_date'
         ]
 
