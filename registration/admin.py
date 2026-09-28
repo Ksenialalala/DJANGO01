@@ -6,7 +6,8 @@ from registration.models import (
     Location,
     Review,
     EventMaterial,
-    Organizer
+    Organizer,
+    Profile
 )
 
 # Register your models here.
@@ -53,3 +54,9 @@ class EventMaterialAdmin(admin.ModelAdmin):
 @admin.register(Organizer)
 class OrganizerAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'position', 'phone', 'email']
+
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    def has_add_permission(self, request):
+        return False
