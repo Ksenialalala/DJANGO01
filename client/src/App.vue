@@ -17,6 +17,9 @@
                 <li class="nav-item">
                     <router-link class="nav-link" to="/">Локации</router-link>
                 </li>
+                <li class="nav-item">
+                    <router-link class="nav-link" to="/organizers">Организаторы</router-link>
+                </li>
             </ul>
             <ul class="navbar-nav">
                 <li class="nav-item dropdown">

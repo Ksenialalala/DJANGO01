@@ -101,6 +101,7 @@ class Organizer(models.Model):
     position = models.TextField("Должность")
     phone = models.TextField("Номер")
     email = models.TextField("Почта")
+    image = models.ImageField("Фото", null=True, blank=True, upload_to="organizers/")
     class Meta:
         verbose_name = "Организатор"
         verbose_name_plural = "Организаторы"
