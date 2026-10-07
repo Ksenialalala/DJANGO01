@@ -26,6 +26,9 @@
                 <li class="nav-item">
                     <router-link class="nav-link" to="/registrations">Регистрация</router-link>
                 </li>
+                <li class="nav-item">
+                    <router-link class="nav-link" to="/event-materials">Материалы</router-link>
+                </li>
             </ul>
             <ul class="navbar-nav">
                 <li class="nav-item dropdown">
