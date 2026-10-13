@@ -11,20 +11,55 @@ const eventToAdd = ref({});
 const eventToEdit = ref({});
 
 const eventsPictureRef = ref();
-const eventAddImageUrl = ref();
 const eventsEditPictureRef = ref();
 
-const selectedImage = ref();
+const eventAddImages = ref([]);
+const eventEditImages = ref([]);
+
+const selectedImages = ref([]);
+const selectedImageIndex = ref(0);
+const pictures = ref([]);
+
+async function fetchPictures() {
+  const r = await axios.get("/api/pictures/");
+  pictures.value = r.data;
+}
 
 async function fetchEvents() {
   loading.value = true;
 
-  const r = await axios.get("/api/events/");
+  try {
+    await fetchPictures();
 
-  console.log(r.data);
+    const r = await axios.get("/api/events/");
 
-  events.value = r.data;
-  loading.value = false;
+    events.value = r.data.map((event) => {
+      const images = (event.images || [])
+        .map((image) => {
+          if (typeof image === "object") {
+            return image;
+          }
+
+          return pictures.value.find((picture) => picture.id === image);
+        })
+        .filter((image) => image);
+
+      if (event.image) {
+        images.unshift({
+          id: "old",
+          image: event.image,
+          old: true,
+        });
+      }
+
+      return {
+        ...event,
+        images: images,
+      };
+    });
+  } finally {
+    loading.value = false;
+  }
 }
 
 async function fetchLocations() {
@@ -43,64 +78,176 @@ async function fetchOrganizers() {
   organizers.value = r.data;
 }
 
-async function onEventEditClick(event) {
-  eventToEdit.value = { ...event };
+function onEventEditClick(event) {
+  eventToEdit.value = {
+    ...event,
+    images: [...(event.images || [])],
+    originalImages: [...(event.images || [])],
+    removeOldImage: false,
+  };
+
+  eventEditImages.value = [];
 }
 
-async function onUpdateEvent() {
-  const formData = new FormData();
+function eventsAddPictureChange() {
+  const files = Array.from(eventsPictureRef.value.files);
 
-  formData.append("location", eventToEdit.value.location);
-  formData.append("organizer", eventToEdit.value.organizer);
-  formData.append("title", eventToEdit.value.title);
-  formData.append("description", eventToEdit.value.description);
-  formData.append("event_date", eventToEdit.value.event_date);
-  formData.append("max_participants", eventToEdit.value.max_participants);
-  formData.append("status", eventToEdit.value.status);
-
-  if (eventToEdit.value.image instanceof File) {
-    formData.append("image", eventToEdit.value.image);
+  for (const file of files) {
+    eventAddImages.value.push({
+      file: file,
+      url: URL.createObjectURL(file),
+    });
   }
 
-  await axios.put(`/api/events/${eventToEdit.value.id}/`, formData);
-
-  await fetchEvents();
+  eventsPictureRef.value.value = "";
 }
 
-async function onEventAdd() {
-  console.log(eventToAdd.value);
-
-  const formData = new FormData();
-
-  formData.append("location", eventToAdd.value.location);
-  formData.append("organizer", eventToAdd.value.organizer);
-  formData.append("title", eventToAdd.value.title);
-  formData.append("description", eventToAdd.value.description);
-  formData.append("event_date", eventToAdd.value.event_date);
-  formData.append("max_participants", eventToAdd.value.max_participants);
-  formData.append("status", eventToAdd.value.status);
-
-  formData.append("image", eventsPictureRef.value.files[0]);
-
-  await axios.post("/api/events/", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-
-  await fetchEvents();
-}
-
-async function eventsAddPictureChange() {
-  eventAddImageUrl.value = URL.createObjectURL(eventsPictureRef.value.files[0]);
-}
-
-function onImageClick(image) {
-  selectedImage.value = image;
+function removeAddImage(index) {
+  URL.revokeObjectURL(eventAddImages.value[index].url);
+  eventAddImages.value.splice(index, 1);
 }
 
 function eventsEditPictureChange() {
-  eventToEdit.value.image = eventsEditPictureRef.value.files[0];
+  const files = Array.from(eventsEditPictureRef.value.files);
+
+  for (const file of files) {
+    eventEditImages.value.push({
+      file: file,
+      url: URL.createObjectURL(file),
+    });
+  }
+
+  eventsEditPictureRef.value.value = "";
+}
+
+function removeEditImage(index) {
+  URL.revokeObjectURL(eventEditImages.value[index].url);
+  eventEditImages.value.splice(index, 1);
+}
+
+function removeSavedImage(index) {
+  const image = eventToEdit.value.images[index];
+
+  if (image.old) {
+    eventToEdit.value.removeOldImage = true;
+  }
+
+  eventToEdit.value.images.splice(index, 1);
+}
+
+async function uploadImages(images) {
+  const ids = [];
+
+  for (const item of images) {
+    const formData = new FormData();
+    formData.append("image", item.file);
+
+    const r = await axios.post("/api/pictures/", formData);
+    ids.push(r.data.id);
+  }
+
+  return ids;
+}
+
+async function onEventAdd() {
+  const data = {
+    location: eventToAdd.value.location,
+    organizer: eventToAdd.value.organizer,
+    title: eventToAdd.value.title,
+    description: eventToAdd.value.description,
+    event_date: eventToAdd.value.event_date,
+    max_participants: eventToAdd.value.max_participants,
+    status: eventToAdd.value.status,
+  };
+
+  const r = await axios.post("/api/events/", data);
+
+  const ids = await uploadImages(eventAddImages.value);
+
+  if (ids.length > 0) {
+    await axios.patch(`/api/events/${r.data.id}/`, {
+      images: ids,
+    });
+  }
+
+  for (const image of eventAddImages.value) {
+    URL.revokeObjectURL(image.url);
+  }
+
+  eventAddImages.value = [];
+  eventToAdd.value = {};
+
+  await fetchEvents();
+}
+
+async function onUpdateEvent() {
+  const event = eventToEdit.value;
+
+  const data = {
+    location: event.location,
+    organizer: event.organizer,
+    title: event.title,
+    description: event.description,
+    event_date: event.event_date,
+    max_participants: event.max_participants,
+    status: event.status,
+  };
+
+  if (event.removeOldImage) {
+    data.image = null;
+  }
+
+  await axios.patch(`/api/events/${event.id}/`, data);
+
+  const newIds = await uploadImages(eventEditImages.value);
+
+  const ids = event.images
+    .filter((image) => !image.old)
+    .map((image) => image.id);
+
+  ids.push(...newIds);
+
+  await axios.patch(`/api/events/${event.id}/`, {
+    images: ids,
+  });
+
+  const currentIds = event.images
+    .filter((image) => !image.old)
+    .map((image) => image.id);
+
+  for (const image of event.originalImages) {
+    if (!image.old && !currentIds.includes(image.id)) {
+      await axios.delete(`/api/pictures/${image.id}/`);
+    }
+  }
+
+  for (const image of eventEditImages.value) {
+    URL.revokeObjectURL(image.url);
+  }
+
+  eventEditImages.value = [];
+
+  await fetchEvents();
+}
+
+function onImageClick(images, index) {
+  selectedImages.value = images;
+  selectedImageIndex.value = index;
+}
+
+function previousImage() {
+  if (selectedImages.value.length === 0) return;
+
+  selectedImageIndex.value =
+    (selectedImageIndex.value - 1 + selectedImages.value.length) %
+    selectedImages.value.length;
+}
+
+function nextImage() {
+  if (selectedImages.value.length === 0) return;
+
+  selectedImageIndex.value =
+    (selectedImageIndex.value + 1) % selectedImages.value.length;
 }
 
 function onImageChange(event) {
@@ -222,13 +369,32 @@ onBeforeMount(async () => {
           </div>
 
           <div class="col">
-            <label class="form-label">Изображение</label>
+            <label class="form-label">Фотографии</label>
             <input
               type="file"
               class="form-control"
               ref="eventsPictureRef"
+              accept="image/*"
+              multiple
               @change="eventsAddPictureChange"
             />
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            <div
+              v-for="(image, index) in eventAddImages"
+              :key="image.url"
+              class="photo-item"
+            >
+              <img :src="image.url" alt="" />
+              <button
+                type="button"
+                class="btn btn-danger btn-sm"
+                @click="removeAddImage(index)"
+              >
+                Удалить
+              </button>
+            </div>
           </div>
 
           <div class="col-auto">
@@ -343,26 +509,62 @@ onBeforeMount(async () => {
               </div>
             </div>
 
-            <div class="row mt-2">
-              <div class="col">
-                <label class="form-label">Изображение</label>
-                <input
-                  type="file"
-                  class="form-control"
-                  ref="eventsEditPictureRef"
-                  @change="eventsEditPictureChange"
-                />
-              </div>
-              <div class="col">
-                <label class="form-label">Текущая картинка</label>
+            <div class="mt-3">
+              <label class="form-label">Фотографии мероприятия</label>
 
-                <div v-if="eventToEdit.image">
+              <div class="d-flex flex-wrap gap-2">
+                <div
+                  v-for="(image, index) in eventToEdit.images"
+                  :key="image.id"
+                  class="photo-item"
+                >
                   <img
-                    :src="eventToEdit.image"
-                    style="max-height: 100px"
+                    :src="image.image"
                     alt=""
+                    @click="onImageClick(eventToEdit.images, index)"
+                    data-bs-toggle="modal"
+                    data-bs-target="#imageModal"
                   />
+
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-sm"
+                    @click="removeSavedImage(index)"
+                  >
+                    Удалить
+                  </button>
                 </div>
+              </div>
+            </div>
+
+            <div class="mt-3">
+              <label class="form-label">Добавить фотографии</label>
+
+              <input
+                type="file"
+                class="form-control"
+                ref="eventsEditPictureRef"
+                accept="image/*"
+                multiple
+                @change="eventsEditPictureChange"
+              />
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-2">
+              <div
+                v-for="(image, index) in eventEditImages"
+                :key="image.url"
+                class="photo-item"
+              >
+                <img :src="image.url" alt="" />
+
+                <button
+                  type="button"
+                  class="btn btn-danger btn-sm"
+                  @click="removeEditImage(index)"
+                >
+                  Удалить
+                </button>
               </div>
             </div>
           </div>
@@ -404,10 +606,37 @@ onBeforeMount(async () => {
           </div>
 
           <div class="modal-body text-center">
-            <img :src="selectedImage" class="img-fluid" alt="" />
+            <img
+              v-if="selectedImages.length"
+              :src="selectedImages[selectedImageIndex].image"
+              class="img-fluid"
+              alt=""
+            />
           </div>
 
           <div class="modal-footer">
+            <button
+              v-if="selectedImages.length > 1"
+              type="button"
+              class="btn btn-secondary"
+              @click="previousImage"
+            >
+              Предыдущая
+            </button>
+
+            <span v-if="selectedImages.length > 1">
+              {{ selectedImageIndex + 1 }} из {{ selectedImages.length }}
+            </span>
+
+            <button
+              v-if="selectedImages.length > 1"
+              type="button"
+              class="btn btn-primary"
+              @click="nextImage"
+            >
+              Следующая
+            </button>
+
             <button
               type="button"
               class="btn btn-secondary"
@@ -442,11 +671,14 @@ onBeforeMount(async () => {
 
         <div>Статус: {{ item.status }}</div>
 
-        <div v-show="item.image">
+        <div class="d-flex flex-wrap gap-2">
           <img
-            :src="item.image"
-            style="max-height: 60px; cursor: pointer"
-            @click="onImageClick(item.image)"
+            v-for="(image, index) in item.images"
+            :key="image.id"
+            :src="image.image"
+            class="event-image"
+            alt=""
+            @click="onImageClick(item.images, index)"
             data-bs-toggle="modal"
             data-bs-target="#imageModal"
           />
@@ -470,6 +702,7 @@ onBeforeMount(async () => {
 </template>
 
 
+
 <style lang="scss" scoped>
 .event-item {
   padding: 0.5rem;
@@ -487,5 +720,21 @@ onBeforeMount(async () => {
 .event-image {
   max-width: 200px;
   max-height: 150px;
+  object-fit: contain;
+  cursor: pointer;
+}
+
+.photo-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.photo-item img {
+  width: 120px;
+  height: 90px;
+  object-fit: cover;
+  cursor: pointer;
 }
 </style>

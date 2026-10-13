@@ -7,7 +7,8 @@ from registration.models import (
     Location,
     Review,
     EventMaterial,
-    Organizer
+    Organizer,
+    Picture
 )
 
 from registration.serializers import (
@@ -16,7 +17,8 @@ from registration.serializers import (
     LocationSerializer,
     ReviewSerializer,
     EventMaterialSerializer,
-    OrganizerSerializer
+    OrganizerSerializer,
+    PictureSerializer
 )
 
 
@@ -90,3 +92,13 @@ class OrganizersViewset(
 ):
     queryset = Organizer.objects.all()
     serializer_class = OrganizerSerializer
+
+class PicturesViewset(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    GenericViewSet
+):
+    queryset = Picture.objects.all()
+    serializer_class = PictureSerializer

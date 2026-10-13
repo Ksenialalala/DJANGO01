@@ -29,7 +29,8 @@ from registration.api import (
     RegistrationsViewset,
     ReviewsViewset,
     EventMaterialsViewset,
-    OrganizersViewset
+    OrganizersViewset,
+    PicturesViewset
 )
 
 router = DefaultRouter()
@@ -39,6 +40,7 @@ router.register("registrations", RegistrationsViewset, basename="registrations")
 router.register("reviews", ReviewsViewset, basename="reviews")
 router.register("event-materials", EventMaterialsViewset, basename="event-materials")
 router.register("organizers", OrganizersViewset, basename="organizers")
+router.register("pictures", PicturesViewset, basename="pictures")
 
 
 urlpatterns = [

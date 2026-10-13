@@ -6,7 +6,8 @@ from registration.models import (
     Location,
     Review,
     EventMaterial,
-    Organizer
+    Organizer,
+    Picture
 )
 
 
@@ -43,6 +44,7 @@ class EventSerializer(serializers.ModelSerializer):
             'event_date',
             'max_participants',
             'image',
+            'images',
             'status'
         ]
 
@@ -74,4 +76,8 @@ class EventMaterialSerializer(serializers.ModelSerializer):
             'material_date'
         ]
 
+class PictureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Picture
+        fields = ['id', 'image']
 

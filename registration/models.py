@@ -48,6 +48,7 @@ class Event(models.Model):
     event_date = models.DateTimeField("Дата")
     max_participants = models.IntegerField("Количество участников")
     image = models.ImageField("Картинка", null=True, blank=True, upload_to='events/')
+    images = models.ManyToManyField("Picture", blank=True, related_name="events")
     class StatusType(models.TextChoices):
         PLANNED = "PLANNED", "Запланировано"
         COMPLETED = "COMPLETED", "Завершено"
@@ -108,3 +109,9 @@ class Organizer(models.Model):
         
     def __str__(self) -> str:
             return self.name
+
+class Picture(models.Model):
+    image = models.ImageField(upload_to="event_photos/")
+
+    def __str__(self):
+        return f"Фото {self.id}"
