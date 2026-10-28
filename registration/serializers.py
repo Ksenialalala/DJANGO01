@@ -13,9 +13,16 @@ from registration.models import (
 
 class RegistrationSerializer(serializers.ModelSerializer):
 
+    def create(self, validated_data):
+        if "request" in self.context:
+            validated_data["user"] = self.context["request"].user
+
+        return super().create(validated_data)
+    
     class Meta:
         model = Registration
         fields = ['id', 'user', 'event', 'registration_date', 'status']
+        read_only_fields = ['user', 'registration_date']
 
 class OrganizerSerializer(serializers.ModelSerializer):
 
@@ -51,6 +58,12 @@ class EventSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
 
+    def create(self, validated_data):
+        if "request" in self.context:
+            validated_data["user"] = self.context["request"].user
+
+        return super().create(validated_data)
+
     class Meta:
         model = Review
         fields = [
@@ -61,6 +74,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             'comment',
             'review_date'
         ]
+        read_only_fields = ['user', 'review_date']
 
 
 class EventMaterialSerializer(serializers.ModelSerializer):

@@ -30,18 +30,19 @@ from registration.api import (
     ReviewsViewset,
     EventMaterialsViewset,
     OrganizersViewset,
-    PicturesViewset
+    PicturesViewset,
+    ProfileViewSet
 )
 
 router = DefaultRouter()
-router.register("locations", LocationsViewset, basename="locations")
-router.register("events", EventsViewset, basename="events")
-router.register("registrations", RegistrationsViewset, basename="registrations")
-router.register("reviews", ReviewsViewset, basename="reviews")
-router.register("event-materials", EventMaterialsViewset, basename="event-materials")
-router.register("organizers", OrganizersViewset, basename="organizers")
-router.register("pictures", PicturesViewset, basename="pictures")
-
+router.register("locations", LocationsViewset, "locations")
+router.register("events", EventsViewset, "events")
+router.register("registrations", RegistrationsViewset, "registrations")
+router.register("reviews", ReviewsViewset, "reviews")
+router.register("event-materials", EventMaterialsViewset, "event-materials")
+router.register("organizers", OrganizersViewset, "organizers")
+router.register("pictures", PicturesViewset, "pictures")
+router.register("profile", ProfileViewSet, "profile")
 
 urlpatterns = [
     path('', views.show_registration),

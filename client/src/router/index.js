@@ -5,10 +5,17 @@ import OrganizersView from '../views/OrganizersView.vue'
 import ReviewsView from '../views/ReviewsView.vue'
 import RegistrationsView from '../views/RegistrationsView.vue'
 import EventMaterialsView from '../views/EventMaterialsView.vue'
+import MainPage from '@/pages/MainPage.vue'
+import LoginPage from '@/pages/LoginPage.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: "/login",
+      name: "LoginPage",
+      component: LoginPage
+    },
     {
       path: "/",
       name: "LocationsView",
