@@ -52,6 +52,16 @@ class EventsViewset(
     queryset = Event.objects.all()
     serializer_class = EventSerializer
 
+    @action(detail=True, url_path='register', methods=['POST'])
+    def register(self, *args, **kwargs):
+        event = self.get_object()
+        Registration.objects.create(
+            user=self.request.user,
+            event=event,
+        )
+
+        return Response()
+
 
 class LocationsViewset(
     mixins.CreateModelMixin,
@@ -75,6 +85,16 @@ class ReviewsViewset(
 ):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        if self.request.user.profile.role == Profile.Role.administrator:
+            return queryset
+
+        queryset = queryset.filter(user=self.request.user)
+
+        return queryset
 
 
 class EventMaterialsViewset(

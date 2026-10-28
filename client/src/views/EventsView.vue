@@ -264,6 +264,10 @@ async function onRemoveClick(event) {
   await fetchEvents();
 }
 
+async function onRegisterOnEventClick(event) {
+  await axios.post(`/api/events/${event.id}/register/`)
+}
+
 onBeforeMount(async () => {
   await fetchEvents();
   await fetchLocations();
@@ -695,6 +699,9 @@ onBeforeMount(async () => {
 
         <button class="btn btn-danger" @click="onRemoveClick(item)">
           <i class="bi bi-x-circle"></i>
+        </button>
+        <button class="btn btn-danger" @click="onRegisterOnEventClick(item)">
+          Зарегаться
         </button>
       </div>
     </div>
