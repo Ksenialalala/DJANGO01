@@ -2,6 +2,7 @@ from rest_framework.viewsets import GenericViewSet
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from registration.models import Profile
 
 from django.contrib.auth.models import User
 from django.contrib.auth import logout as django_logout
@@ -39,6 +40,16 @@ class RegistrationsViewset(
 ):
     queryset = Registration.objects.all()
     serializer_class = RegistrationSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        if self.request.user.profile.role == Profile.Role.administrator:
+            return queryset
+
+        queryset = queryset.filter(user=self.request.user)
+
+        return queryset
 
 
 class EventsViewset(
@@ -92,7 +103,8 @@ class ReviewsViewset(
         if self.request.user.profile.role == Profile.Role.administrator:
             return queryset
 
-        queryset = queryset.filter(user=self.request.user)
+        if self.action in ['update', 'partial_update', 'destroy']:
+            queryset = queryset.filter(user=self.request.user)
 
         return queryset
 

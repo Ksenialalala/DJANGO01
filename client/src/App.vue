@@ -5,7 +5,7 @@ import useProfileStore from "@/stores/profileStore";
 import { storeToRefs } from 'pinia';
 
 const profileStore = useProfileStore();
-const { isAuthenticated, username } = storeToRefs(profileStore);
+const { isAuthenticated, username, role } = storeToRefs(profileStore);
 
 async function onLogoutButtonCLick() {
   profileStore.logout();
@@ -17,7 +17,7 @@ async function onLogoutButtonCLick() {
   <div class="container">
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">Главная</a>
+        <router-link class="navbar-brand" to="/">Главная</router-link>
         <button
           class="navbar-toggler"
           type="button"
@@ -36,30 +36,30 @@ async function onLogoutButtonCLick() {
         >
           <ul class="navbar-nav">
             <li class="nav-item">
-              <router-link class="nav-link" to="/login">Логин</router-link>
+              <router-link class="nav-link" v-if="!isAuthenticated" to="/login">Логин</router-link>
             </li>
             <li class="nav-item">
-              <router-link class="nav-link" to="/events"
+              <router-link class="nav-link" v-if="isAuthenticated" to="/events"
                 >Мероприятия</router-link
               >
             </li>
-            <li class="nav-item">
-              <router-link class="nav-link" to="/">Локации</router-link>
+            <li class="nav-item" v-if="role === 2">
+              <router-link class="nav-link" to="/locations">Локации</router-link>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" v-if="isAuthenticated">
               <router-link class="nav-link" to="/organizers"
                 >Организаторы</router-link
               >
             </li>
-            <li class="nav-item">
+            <li class="nav-item" v-if="isAuthenticated">
               <router-link class="nav-link" to="/reviews">Отзывы</router-link>
             </li>
-            <li class="nav-item">
+            <li class="nav-item" v-if="isAuthenticated">
               <router-link class="nav-link" to="/registrations"
                 >Регистрация</router-link
               >
             </li>
-            <li class="nav-item">
+            <li class="nav-item" v-if="role === 2">
               <router-link class="nav-link" to="/event-materials"
                 >Материалы</router-link
               >
