@@ -1,6 +1,11 @@
 <script setup>
 import { ref, onBeforeMount } from "vue";
 import axios from "axios";
+import useProfileStore from "@/stores/profileStore";
+import { storeToRefs } from "pinia";
+
+const profileStore = useProfileStore();
+const { role, userId } = storeToRefs(profileStore);
 
 const reviews = ref({});
 const events = ref({});
@@ -205,6 +210,7 @@ onBeforeMount(async () => {
         <div>Дата: {{ item.review_date }}</div>
 
         <button
+          v-if="item.user === userId || role === 2"
           class="btn btn-success"
           @click="onReviewEditClick(item)"
           data-bs-toggle="modal"
@@ -213,7 +219,7 @@ onBeforeMount(async () => {
           <i class="bi bi-pencil-fill"></i>
         </button>
 
-        <button class="btn btn-danger" @click="onRemoveClick(item)">
+        <button v-if="item.user === userId || role === 2" class="btn btn-danger" @click="onRemoveClick(item)">
           <i class="bi bi-x-circle"></i>
         </button>
       </div>

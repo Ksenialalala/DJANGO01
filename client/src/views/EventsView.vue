@@ -1,6 +1,11 @@
 <script setup>
 import { ref, onBeforeMount } from "vue";
 import axios from "axios";
+import useProfileStore from "@/stores/profileStore";
+import { storeToRefs } from "pinia";
+
+const profileStore = useProfileStore();
+const { role } = storeToRefs(profileStore);
 
 const events = ref({});
 const locations = ref({});
@@ -278,7 +283,7 @@ onBeforeMount(async () => {
 
 <template>
   <div class="container-fluid">
-    <div class="p-2">
+    <div class="p-2" v-if="role === 2">
       <form @submit.prevent.stop="onEventAdd">
         <div class="row">
           <div class="col">
@@ -412,7 +417,7 @@ onBeforeMount(async () => {
       </form>
     </div>
 
-    <div class="modal fade" id="editEventModal" tabindex="-1">
+    <div class="modal fade" id="editEventModal" tabindex="-1" v-if="role === 2">
       <div class="modal-dialog modal-lg">
         <div class="modal-content">
           <div class="modal-header">
@@ -689,6 +694,7 @@ onBeforeMount(async () => {
         </div>
 
         <button
+          v-if="role === 2"
           class="btn btn-success"
           @click="onEventEditClick(item)"
           data-bs-toggle="modal"
@@ -697,7 +703,7 @@ onBeforeMount(async () => {
           <i class="bi bi-pencil-fill"></i>
         </button>
 
-        <button class="btn btn-danger" @click="onRemoveClick(item)">
+        <button v-if="role === 2" class="btn btn-danger" @click="onRemoveClick(item)">
           <i class="bi bi-x-circle"></i>
         </button>
         <button class="btn btn-danger" @click="onRegisterOnEventClick(item)">

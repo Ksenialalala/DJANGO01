@@ -8,6 +8,7 @@ const useProfileStore = defineStore('profileStore', () => {
     const isAuthenticated = ref(false);
     const username = ref(null);
     const role = ref(null);
+    const userId = ref(null);
 
     async function fetchMe() {
         const r = await axios.get("/api/profile/me/");
@@ -15,6 +16,7 @@ const useProfileStore = defineStore('profileStore', () => {
         isAuthenticated.value = r.data.is_authenticated;
         username.value = r.data.is_authenticated ? r.data.username : null;
         role.value = r.data.is_authenticated ? r.data.role : null;
+        userId.value = r.data.is_authenticated ? r.data.id : null;
     }
 
     async function login(username, password) {
@@ -38,6 +40,7 @@ const useProfileStore = defineStore('profileStore', () => {
         isAuthenticated,
         username,
         role,
+        userId,
 
         fetchMe,
         login,
