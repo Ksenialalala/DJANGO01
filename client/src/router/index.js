@@ -7,6 +7,8 @@ import RegistrationsView from '../views/RegistrationsView.vue'
 import EventMaterialsView from '../views/EventMaterialsView.vue'
 import MainPage from '@/pages/MainPage.vue'
 import LoginPage from '@/pages/LoginPage.vue'
+import useProfileStore from '@/stores/profileStore'
+import ParticipantsPage from "@/pages/ParticipantsPage.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -50,8 +52,24 @@ const router = createRouter({
       path: "/event-materials",
       name: "EventMaterialsView",
       component: EventMaterialsView
+    },
+    {
+        path: "/participants",
+        name: "ParticipantsPage",
+        component: ParticipantsPage,
     }
   ],
+})
+
+router.beforeEach(async (to, from) => {
+  const profileStore = useProfileStore();
+  if (
+    !profileStore.isAuthenticated &&
+    to.name !== 'LoginPage' 
+    && to.name != 'MainPage'
+  ) {
+    return { name: 'LoginPage' }
+  }
 })
 
 export default router

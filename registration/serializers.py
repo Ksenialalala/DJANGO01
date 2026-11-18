@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User
 
 from registration.models import (
     Registration,
@@ -95,3 +96,7 @@ class PictureSerializer(serializers.ModelSerializer):
         model = Picture
         fields = ['id', 'image']
 
+class ParticipantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'email']

@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref, onBeforeMount } from "vue";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { useRouter } from "vue-router";
 
 const useProfileStore = defineStore('profileStore', () => {
 
@@ -9,6 +10,7 @@ const useProfileStore = defineStore('profileStore', () => {
     const username = ref(null);
     const role = ref(null);
     const userId = ref(null);
+    const router = useRouter();
 
     async function fetchMe() {
         const r = await axios.get("/api/profile/me/");
@@ -24,12 +26,14 @@ const useProfileStore = defineStore('profileStore', () => {
             username: username,
             password: password
         })
-        fetchMe();
+        await fetchMe();
+        router.push("/");
     }
 
     async function logout() {
         await axios.post("/api/profile/logout/")
-        fetchMe();
+        await fetchMe();
+        router.push("/");
     }
 
     onBeforeMount(() => {

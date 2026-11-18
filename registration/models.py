@@ -37,7 +37,7 @@ class Registration(models.Model):
         verbose_name_plural = "Регистрации"
 
     def __str__(self) -> str:
-            return self.name
+            return self.event.title
         
 
 class Event(models.Model):

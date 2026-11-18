@@ -64,6 +64,11 @@ async function onLogoutButtonCLick() {
                 >Материалы</router-link
               >
             </li>
+            <li class="nav-item" v-if="role === 2">
+              <router-link class="nav-link" to="/participants"
+                >Участники</router-link
+              >
+            </li>
           </ul>
           <ul class="navbar-nav">
             <li class="nav-item dropdown">

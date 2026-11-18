@@ -1,5 +1,5 @@
 from rest_framework.viewsets import GenericViewSet
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, viewsets, pagination, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from registration.models import Profile
@@ -8,6 +8,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import logout as django_logout
 from django.contrib.auth import login as django_login
 from django.contrib.auth import authenticate
+
+from .serializers import ParticipantSerializer
 
 from registration.models import (
     Registration,
@@ -28,6 +30,17 @@ from registration.serializers import (
     OrganizerSerializer,
     PictureSerializer
 )
+
+class ParticipantsViewSet(
+    mixins.ListModelMixin,
+    GenericViewSet
+):
+    queryset = User.objects.filter(
+        profile__role=Profile.Role.participant
+    ).select_related('profile')
+
+    serializer_class = ParticipantSerializer
+    pagination_class = pagination.PageNumberPagination
 
 
 class RegistrationsViewset(
@@ -103,8 +116,7 @@ class ReviewsViewset(
         if self.request.user.profile.role == Profile.Role.administrator:
             return queryset
 
-        if self.action in ['update', 'partial_update', 'destroy']:
-            queryset = queryset.filter(user=self.request.user)
+        queryset = queryset.filter(user=self.request.user)
 
         return queryset
 

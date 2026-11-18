@@ -19,6 +19,7 @@ from django.contrib import admin
 from django.urls import path, include
 
 from django.conf import settings
+from debug_toolbar.toolbar import debug_toolbar_urls
 
 from registration import views
 from rest_framework.routers import DefaultRouter
@@ -31,7 +32,8 @@ from registration.api import (
     EventMaterialsViewset,
     OrganizersViewset,
     PicturesViewset,
-    ProfileViewSet
+    ProfileViewSet,
+    ParticipantsViewSet
 )
 
 router = DefaultRouter()
@@ -43,6 +45,7 @@ router.register("event-materials", EventMaterialsViewset, "event-materials")
 router.register("organizers", OrganizersViewset, "organizers")
 router.register("pictures", PicturesViewset, "pictures")
 router.register("profile", ProfileViewSet, "profile")
+router.register("participants", ParticipantsViewSet, "participants")
 
 urlpatterns = [
     path('', views.show_registration),
@@ -51,4 +54,7 @@ urlpatterns = [
 ] + static(
     settings.MEDIA_URL,
     document_root=settings.MEDIA_ROOT
-)
+) + static(
+    settings.STATIC_URL,
+    document_root=settings.STATIC_ROOT
+) + debug_toolbar_urls()
