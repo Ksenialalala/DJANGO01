@@ -40,7 +40,20 @@ class ParticipantsViewSet(
     ).select_related('profile')
 
     serializer_class = ParticipantSerializer
-    pagination_class = pagination.PageNumberPagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        event_id = self.request.query_params.get('event')
+
+        if event_id:
+            participants_ids = Registration.objects.filter(
+                event_id=event_id
+            ).values_list('user_id', flat=True)
+
+            queryset = queryset.filter(id__in=participants_ids)
+
+        return queryset
 
 
 class RegistrationsViewset(

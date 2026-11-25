@@ -15,7 +15,7 @@ async function onLogoutButtonCLick() {
 
 <template>
   <div class="container">
-    <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <nav class="navbar navbar-expand-sm bg-body-tertiary">
       <div class="container-fluid">
         <router-link class="navbar-brand" to="/">Главная</router-link>
         <button

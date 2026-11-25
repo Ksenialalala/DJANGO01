@@ -5,103 +5,117 @@ import axios from 'axios';
 
 const participants = ref([]);
 
-const page = ref(1);
-const pageItemsCount = ref(10);
-const totalCount = ref(0);
+const events = ref([]);
+const selectedEvent = ref('');
 const loading = ref(false);
 
-async function fetchParticipants() {
-    loading.value = true;
-
-    try {
-        let r = await axios.get('/api/participants/', {
-            params: {
-                page: page.value
-            }
-        });
-
-        participants.value = r.data.results || r.data;
-        totalCount.value = r.data.count || participants.value.length;
-    }
-    finally {
-        loading.value = false;
-    }
+async function fetchEvents() {
+    let r = await axios.get('/api/events/');
+    events.value = r.data;
 }
 
-const pagesCount = computed(() => {
-    return Math.ceil(totalCount.value / pageItemsCount.value);
-});
+async function fetchParticipants() {
 
-watch(page, () => {
+    console.log('Выбранное мероприятие:', selectedEvent.value);
+    loading.value = true;
+
+    let r = await axios.get('/api/participants/', {
+        params: {
+            event: selectedEvent.value
+        }
+    });
+
+     console.log('URL запроса:', r.config.url, r.config.params);
+    console.log('Количество участников:', r.data.length);
+
+    participants.value = r.data;  
+    loading.value = false;
+    
+
+}
+
+const participantsFiltered = computed(() => {
+    return participants.value;
+})
+
+watch(selectedEvent, () => {
     fetchParticipants();
 });
 
 onBeforeMount(() => {
+    fetchEvents();
     fetchParticipants();
 });
 </script>
 
 <template>
-    <div class="container mt-3">
-        <h3>Участники библиотеки</h3>
+    <div>
+        <div class="mb-3">
+            <label for="eventSelect" class="form-label">
+                Фильтр по мероприятию:
+            </label>
 
-        <div v-if="loading">Загружаю данные...</div>
+            <select
+                id="eventSelect"
+                class="form-select"
+                v-model="selectedEvent"
+            >
+                <option value="">Все участники</option>
 
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Фамилия</th>
-                    <th scope="col">Имя</th>
-                    <th scope="col">Логин</th>
-                    <th scope="col">Электронная почта</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                <tr v-for="p in participants" :key="p.id">
-                    <th scope="row">{{ p.id }}</th>
-                    <td>{{ p.last_name }}</td>
-                    <td>{{ p.first_name }}</td>
-                    <td>{{ p.username }}</td>
-                    <td>{{ p.email }}</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <div v-if="!loading && (!participants || participants.length === 0)">
-            Участники не найдены.
+                <option
+                    v-for="event in events"
+                    :key="event.id"
+                    :value="event.id"
+                >
+                    {{ event.title }}
+                </option>
+            </select>
         </div>
+        <div class="container mt-3">
 
-        <nav aria-label="Навигация по страницам">
-            <ul class="pagination justify-content-center">
-                <li class="page-item" :class="{ disabled: page <= 1 }">
-                    <button
-                        class="page-link"
-                        :disabled="page <= 1"
-                        @click="page--"
-                    >
-                        Previous
-                    </button>
-                </li>
+            <div v-if="loading">Загружаю данные...</div>
 
-                <li class="page-item active">
-                    <span class="page-link">
-                        {{ page }} из {{ pagesCount }}
-                    </span>
-                </li>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Фамилия</th>
+                        <th scope="col">Имя</th>
+                        <th scope="col">Логин</th>
+                        <th scope="col">Электронная почта</th>
+                    </tr>
+                </thead>
 
-                <li class="page-item" :class="{ disabled: page >= pagesCount }">
-                    <button
-                        class="page-link"
-                        :disabled="page >= pagesCount"
-                        @click="page++"
-                    >
-                        Next
-                    </button>
-                </li>
-            </ul>
-        </nav>
+                <tbody>
+                    <tr v-for="p in participantsFiltered">
+                        <th scope="row">{{ p.id }}</th>
+                        <td>{{ p.last_name }}</td>
+                        <td>{{ p.first_name }}</td>
+                        <td>{{ p.username }}</td>
+                        <td>{{ p.email }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <nav aria-label="Навигация по страницам">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" @click="page -= 1">
+                        <a class="page-link" href="#">Previous</a>
+                    </li>
+
+                    <li @click="page = page - 1" class="page-item" v-if="page - 1 > 0"><a class="page-link" >{{ page - 1 }}</a></li>
+                    <li  class="page-item" v-if="page > 0"><span href="" class="page-link">{{ page  }}</span></li>
+                    <li @click="page = page + 1" class="page-item" v-if="page + 1 < pagesCount"><a class="page-link" >{{ page + 1 }}</a></li>
+                    <li @click="page = page + 2" class="page-item" v-if="page + 2 < pagesCount"><a class="page-link" >{{ page + 2 }}</a></li>
+                    <li @click="page = page + 3" class="page-item" v-if="page + 3 < pagesCount"><a class="page-link" >{{ page + 3 }}</a></li>
+
+
+                    <li class="page-item">
+                        <a class="page-link" href="#" @click="page += 1">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
     </div>
 </template>
 
